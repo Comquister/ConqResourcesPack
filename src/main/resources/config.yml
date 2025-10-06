@@ -1,0 +1,22 @@
+# Lista de resource packs para mesclar
+# Formatos suportados:
+# - Modrinth: https://modrinth.com/resourcepack/nome-do-pack
+# - CurseForge: https://www.curseforge.com/minecraft/texture-packs/nome-do-pack
+# - URL direta: https://exemplo.com/pack.zip
+resourcepacks:
+  - https://modrinth.com/resourcepack/unique-dark
+  - https://modrinth.com/resourcepack/icons
+  - https://modrinth.com/resourcepack/tras-fresh-player
+  - https://www.curseforge.com/minecraft/texture-packs/fresh-animations
+  #- https://exemplo.com/meu-pack.zip
+
+curseforge-api-key: ""
+
+custom-overlay-folder: "server_pack"
+# IP/hostname do seu servidor (usado para gerar URLs dos packs)
+# Use o IP público ou domínio que os jogadores usam para conectar
+server-ip: "localhost"
+
+# Porta do servidor HTTP embutido
+# Certifique-se que esta porta está aberta no firewall
+http-port: 8080

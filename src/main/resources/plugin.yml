@@ -1,0 +1,12 @@
+name: ConqResourcesPack
+version: 1.0.0
+main: conquister.conqResourcesPack.ConqResourcesPack
+api-version: 1.16
+author: Conquister
+description: Plugin para carregar múltiplos resource packs do Modrinth automaticamente
+softdepend: [ViaVersion]
+commands:
+  conqresourcepack:
+    description: Comandos do ConqResourcesPack
+    usage: /conqresourcepack [clear|status|reload|zip]
+    aliases: [crp]
