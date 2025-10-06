@@ -2,6 +2,7 @@ name: ConqResourcesPack
 version: 1.0.0
 main: conquister.conqResourcesPack.ConqResourcesPack
 api-version: 1.16
+folia-supported: true
 author: Conquister
 description: Plugin para carregar múltiplos resource packs do Modrinth automaticamente
 softdepend: [ViaVersion]

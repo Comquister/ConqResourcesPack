@@ -23,7 +23,7 @@
       </plugin>
       <plugin>
         <artifactId>maven-shade-plugin</artifactId>
-        <version>3.2.4</version>
+        <version>3.6.0</version>
         <executions>
           <execution>
             <phase>package</phase>
@@ -32,6 +32,14 @@
             </goals>
           </execution>
         </executions>
+        <configuration>
+          <relocations>
+            <relocation>
+              <pattern>com.tcoded.folialib</pattern>
+              <shadedPattern>conquister.conqResourcesPack.lib.folialib</shadedPattern>
+            </relocation>
+          </relocations>
+        </configuration>
       </plugin>
     </plugins>
   </build>
@@ -43,6 +51,10 @@
     <repository>
       <id>viaversion-repo</id>
       <url>https://repo.viaversion.com</url>
+    </repository>
+    <repository>
+      <id>tcoded-releases</id>
+      <url>https://repo.tcoded.com/releases</url>
     </repository>
   </repositories>
   <dependencies>

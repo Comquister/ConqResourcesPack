@@ -2,6 +2,8 @@ package conquister.conqResourcesPack;
 
 import com.google.gson.*;
 import com.sun.net.httpserver.HttpServer;
+import com.tcoded.folialib.FoliaLib;
+import com.tcoded.folialib.wrapper.task.WrappedTask;
 import com.viaversion.viaversion.api.Via;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import org.bukkit.Bukkit;
@@ -25,9 +27,13 @@ public final class ConqResourcesPack extends JavaPlugin implements Listener {
     private HttpServer httpServer;
     private Map<String, MergedPack> packCache = new ConcurrentHashMap<>();
     private Map<String, Object> buildLocks = new ConcurrentHashMap<>();
+    private FoliaLib foliaLib;
 
     @Override
     public void onEnable() {
+        // Initialize FoliaLib
+        foliaLib = new FoliaLib(this);
+
         packsFolder = new File(getDataFolder(), "packs");
         mergedPacksFolder = new File(getDataFolder(), "merged");
         packsFolder.mkdirs();
@@ -44,19 +50,23 @@ public final class ConqResourcesPack extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(this, this);
         setupCommand();
         startHttpServer();
-        new Thread(() -> {
+
+        // Use FoliaLib async for loading sources
+        foliaLib.getScheduler().runAsync(task -> {
             try {
                 loadSources();
                 getLogger().info("§aFontes carregadas: " + sources.size());
             } catch (Exception e) {
                 getLogger().severe("Erro ao carregar fontes: " + e.getMessage());
             }
-        }, "ConqRP-SourceLoader").start();
+        });
     }
 
     @Override
     public void onDisable() {
         if (httpServer != null) httpServer.stop(0);
+        // Cancel all FoliaLib tasks
+        foliaLib.getScheduler().cancelAllTasks();
     }
 
     private void setupCommand() {
@@ -73,12 +83,38 @@ public final class ConqResourcesPack extends JavaPlugin implements Listener {
             }
             if (args.length > 0 && args[0].equalsIgnoreCase("reload")) {
                 reloadConfig();
-                new Thread(() -> {try {loadSources(); Bukkit.getScheduler().runTask(this, () -> sender.sendMessage("§aConfig recarregada! Fontes: §f" + sources.size()));} catch (Exception e) {Bukkit.getScheduler().runTask(this, () -> sender.sendMessage("§cErro ao recarregar: " + e.getMessage()));}}, "ConqRP-Reload").start();
+                foliaLib.getScheduler().runAsync(task -> {
+                    try {
+                        loadSources();
+                        foliaLib.getScheduler().runNextTick(t ->
+                                sender.sendMessage("§aConfig recarregada! Fontes: §f" + sources.size())
+                        );
+                    } catch (Exception e) {
+                        foliaLib.getScheduler().runNextTick(t ->
+                                sender.sendMessage("§cErro ao recarregar: " + e.getMessage())
+                        );
+                    }
+                });
                 return true;
             }
             if (args.length > 0 && args[0].equalsIgnoreCase("zip")) {
                 sender.sendMessage("§eReenviando resource packs...");
-                new Thread(() -> {final int[] c = {0}; for (Player p : Bukkit.getOnlinePlayers()) {String v = getPlayerMinecraftVersion(p); MergedPack pk = getOrCreatePack(v); if (pk != null) {c[0]++; Bukkit.getScheduler().runTask(this, () -> p.setResourcePack(pk.url, hexToBytes(pk.hash)));}} Bukkit.getScheduler().runTask(this, () -> sender.sendMessage("§aResource packs reenviados para §f" + c[0] + " §ajogadores!"));}, "ConqRP-Resend").start();
+                foliaLib.getScheduler().runAsync(task -> {
+                    final int[] c = {0};
+                    for (Player p : Bukkit.getOnlinePlayers()) {
+                        String v = getPlayerMinecraftVersion(p);
+                        MergedPack pk = getOrCreatePack(v);
+                        if (pk != null) {
+                            c[0]++;
+                            foliaLib.getScheduler().runAtEntity(p, t ->
+                                    p.setResourcePack(pk.url, hexToBytes(pk.hash))
+                            );
+                        }
+                    }
+                    foliaLib.getScheduler().runNextTick(t ->
+                            sender.sendMessage("§aResource packs reenviados para §f" + c[0] + " §ajogadores!")
+                    );
+                });
                 return true;
             }
             sender.sendMessage("§e/conqresourcepack clear §7| §e/conqresourcepack status §7| §e/conqresourcepack reload §7| §e/conqresourcepack zip");
@@ -384,19 +420,22 @@ public final class ConqResourcesPack extends JavaPlugin implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player p = event.getPlayer();
-        Bukkit.getScheduler().runTaskLater(this, () -> {
+        // Use FoliaLib's runLater with entity context (2 seconds = 40 ticks)
+        foliaLib.getScheduler().runAtEntityLater(p, task -> {
             String ver = getPlayerMinecraftVersion(p);
-            new Thread(() -> {
+            foliaLib.getScheduler().runAsync(t -> {
                 MergedPack pack = getOrCreatePack(ver);
                 if (pack != null) {
-                    Bukkit.getScheduler().runTask(this, () -> {
+                    foliaLib.getScheduler().runAtEntity(p, t2 -> {
                         p.setResourcePack(pack.url, hexToBytes(pack.hash));
                         getLogger().info("Pack enviado para " + p.getName() + " (" + ver + ")");
                     });
                 } else {
-                    Bukkit.getScheduler().runTask(this, () -> p.sendMessage("§cErro ao gerar resource pack!"));
+                    foliaLib.getScheduler().runAtEntity(p, t2 ->
+                            p.sendMessage("§cErro ao gerar resource pack!")
+                    );
                 }
-            }, "ConqRP-Build-" + ver).start();
+            });
         }, 40L);
     }
 

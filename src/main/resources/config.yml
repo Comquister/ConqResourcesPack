@@ -1,22 +1,39 @@
-# Lista de resource packs para mesclar
-# Formatos suportados:
-# - Modrinth: https://modrinth.com/resourcepack/nome-do-pack
-# - CurseForge: https://www.curseforge.com/minecraft/texture-packs/nome-do-pack
-# - URL direta: https://exemplo.com/pack.zip
+# ============================
+#  ConqResourcesPack - Config
+# ============================
+
+# Lista de resource packs que o servidor vai usar.
+# Você pode usar links do Modrinth, CurseForge ou URLs diretas (.zip).
+# A ordem importa: os últimos da lista vão sobrescrever arquivos dos primeiros.
+#
+# Exemplos:
+#  - Modrinth: https://modrinth.com/resourcepack/unique-dark
+#  - CurseForge: https://www.curseforge.com/minecraft/texture-packs/fresh-animations
+#  - Link direto: https://meusite.com/packs/personalizado.zip
+#
+# Se quiser desativar um pack sem apagar, basta comentar a linha com "#".
 resourcepacks:
   - https://modrinth.com/resourcepack/unique-dark
   - https://modrinth.com/resourcepack/icons
   - https://modrinth.com/resourcepack/tras-fresh-player
-  - https://www.curseforge.com/minecraft/texture-packs/fresh-animations
-  #- https://exemplo.com/meu-pack.zip
+  #- https://www.curseforge.com/minecraft/texture-packs/fresh-animations
+  #- "https://meusite.com/packs/personalizado.zip"
 
-curseforge-api-key: ""
-
+# Pasta de overlay customizado
+# Todos os arquivos dentro dessa pasta serão adicionados por cima
+# dos packs mesclados. Útil para ajustes específicos do servidor
+# (ex: logo customizada, sons, ícones de GUI).
 custom-overlay-folder: "server_pack"
-# IP/hostname do seu servidor (usado para gerar URLs dos packs)
-# Use o IP público ou domínio que os jogadores usam para conectar
-server-ip: "localhost"
 
-# Porta do servidor HTTP embutido
-# Certifique-se que esta porta está aberta no firewall
+# Porta usada pelo servidor HTTP interno para hospedar os resource packs.
+# Certifique-se de que essa porta esteja liberada no firewall/host.
 http-port: 8080
+
+# IP ou domínio público do servidor, usado para gerar os links dos resource packs.
+# Exemplo: "meu.dominio.com" ou "127.0.0.1" (para testes locais).
+server-ip: "meu.dominio.com"
+
+# Chave de API do CurseForge (opcional).
+# Necessária apenas se você quiser usar packs do CurseForge.
+# Para obter, crie uma chave em: https://console.curseforge.com/
+curseforge-api-key: "MINHA_CHAVE_API"
