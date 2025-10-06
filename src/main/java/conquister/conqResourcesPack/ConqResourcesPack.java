@@ -446,7 +446,7 @@ public final class ConqResourcesPack extends JavaPlugin implements Listener {
                 return v.getName();
             } catch (Exception e) {}
         }
-        return "1.21";
+        return getServer().getVersion();
     }
 
     private ResourcePackVersion findBestVersion(ResourcePackSource src, String pVer) {
